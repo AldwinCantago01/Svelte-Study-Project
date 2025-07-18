@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './create/$types';
 import { env } from '$env/dynamic/private';
+import type { Task } from '$lib/types/Task';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	if (env['X_MASTER_KEY'] === undefined) return { success: false };
@@ -12,7 +13,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		}
 	});
 	if (!getResponse.ok) return { success: false };
-	const { tasks } = await getResponse.json();
+	const { tasks }: { tasks: Task[] } = await getResponse.json();
 
 	return { tasks };
 };

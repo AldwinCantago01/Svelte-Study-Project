@@ -27,7 +27,14 @@
 <tr class={['task-row', { 'even-row': isEvenRow, open: isSubtasksOpen }]} onclick={handleRowClick}>
 	<td>{name}</td>
 	<td>{progression}%</td>
-	<td class="edit-column"><a href="/task-list-comprehensive/edit/{id}"><Pencil size={16} /></a></td>
+	<td class="edit-column"
+		><a
+			onclick={(event: Event) => {
+				event.stopPropagation();
+			}}
+			href="/task-list-comprehensive/edit/{id}"><Pencil size={16} /></a
+		></td
+	>
 </tr>
 
 {#if isSubtasksOpen}
