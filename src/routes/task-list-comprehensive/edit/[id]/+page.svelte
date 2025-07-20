@@ -1,9 +1,17 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { PageProps } from './$types';
+	import type { Task } from '$lib/types/Task';
+
 	import TaskForm from '$lib/components/shared/TaskForm/TaskForm.svelte';
 
-	const { data }: {data: PageData} = $props();
-	const { task } = data;
+	const { form, data }: PageProps = $props();
+	const { task } = data as { task: Task };
 </script>
 
-<TaskForm pageName="Edit Task" taskIDProp={task.id} taskNameProp={task.name} subtasksProp={task.subtasks} />
+<TaskForm
+	formSuccess={form?.success}
+	pageName="Edit Task"
+	taskIDProp={task.id}
+	taskNameProp={task.name}
+	subtasksProp={task.subtasks}
+/>

@@ -2,10 +2,12 @@
 	import { Plus } from '@lucide/svelte';
 
 	import type { PageProps } from './$types';
+	import type { Task } from '$lib/types/Task';
+
 	import TaskRow from '$lib/components/TaskListPage/TaskRow.svelte';
 
 	const { data }: PageProps = $props();
-	const { tasks } = data;
+	const { tasks } = data as { tasks: Task[] };
 </script>
 
 <div class="task-list-page">
@@ -15,25 +17,27 @@
 			<div class="top-section">
 				<a href="/task-list-comprehensive/create"><Plus size={16} /> Create Task</a>
 			</div>
-			<table>
-				<colgroup>
-					<col class="name" />
-					<col class="completion" />
-					<col class="action" />
-				</colgroup>
-				<thead>
-					<tr>
-						<th>Task Name</th>
-						<th>Completion</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each tasks as task, index (task.id)}
-						<TaskRow {task} isEvenRow={index % 2 === 0} />
-					{/each}
-				</tbody>
-			</table>
+			<div class="table-container">
+				<table>
+					<colgroup>
+						<col class="name" />
+						<col class="completion" />
+						<col class="action" />
+					</colgroup>
+					<thead>
+						<tr>
+							<th>Task Name</th>
+							<th>Completion</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each tasks as task, index (task.id)}
+							<TaskRow {task} isEvenRow={index % 2 === 0} />
+						{/each}
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 </div>
@@ -86,6 +90,11 @@
 
 	div.task-list div.top-section a:hover {
 		background-color: rgb(245, 245, 245);
+	}
+
+	div.task-list div.table-container {
+		max-width: 100%;
+		overflow-x: auto;
 	}
 
 	div.task-list table {

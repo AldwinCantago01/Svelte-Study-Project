@@ -1,18 +1,26 @@
 <script lang="ts">
-	import { Plus, Check, CornerDownLeft } from '@lucide/svelte';
+	import { Plus, Check, Pencil, CornerDownLeft } from '@lucide/svelte';
 
 	import type { Subtask } from '$lib/types/Task';
+	import { SUCCESS, FAIL } from '$lib/types/Validation';
 
 	import SubtaskField from '$lib/components/shared/TaskForm/subcomponents/SubtaskField.svelte';
+	import FormMessage from '$lib/components/shared/FormMessage/FormMessage.svelte';
+
+	import validate from '$lib/util/validations/TaskForm/validation';
 
 	type TaskFormProps = {
+		formSuccess?: boolean;
 		taskIDProp?: number;
 		pageName: string;
 		taskNameProp?: string;
 		subtasksProp?: Subtask[];
 	};
 
+	let formElement: HTMLFormElement;
+
 	const {
+		formSuccess = false,
 		taskIDProp,
 		pageName,
 		taskNameProp = '',
@@ -24,8 +32,11 @@
 		]
 	}: TaskFormProps = $props();
 
-	let taskName: string = $state(taskNameProp);
+	let taskName = $state(taskNameProp);
 	let subtasks: Subtask[] = $state(subtasksProp);
+
+	let formMessageVisible = $state(formSuccess);
+	let formMessage = $state(formSuccess ? taskIDProp === undefined ? "Task Successfully Created!" : "Task Successfully Edited!" : "");
 
 	const handleAddSubtask = (event: Event) => {
 		event.preventDefault();
@@ -38,12 +49,38 @@
 	const handleDeleteTask = (index: number) => {
 		subtasks.splice(index, 1);
 	};
+
+	const handleFormSubmit = (event: Event) => {
+		event.preventDefault();
+		const validationResult = validate({
+			id: taskIDProp,
+			name: taskName,
+			subtasks: subtasks
+		});
+
+		if (validationResult.result === FAIL) {
+			formMessageVisible = true;
+			formMessage = validationResult.message;
+		}
+
+		if (validationResult.result === SUCCESS) {
+			formElement.submit();
+		}
+	};
+
+	const handleMessageClose = () => {
+		formMessage = '';
+		formMessageVisible = false;
+	};
 </script>
 
 <div class="task-form-component">
 	<div class="container">
 		<h1 class="title">{pageName}</h1>
-		<form method="POST">
+		<form bind:this={formElement} method="POST">
+			{#if formMessageVisible}
+				<FormMessage message={formMessage} onCloseClick={handleMessageClose} />
+			{/if}
 			<input type="hidden" name="id" value={taskIDProp} />
 			<div class="task-name-field">
 				<label for="TaskName">Task Name:</label>
@@ -59,7 +96,14 @@
 				<button class="add-task" onclick={handleAddSubtask}><Plus size={16} /> Add Task</button>
 				<div class="right-section">
 					<a class="back" href="/task-list-comprehensive"><CornerDownLeft size={16} /> Back</a>
-					<button class="submit"><Check size={16} /> Create Task</button>
+					<button class="submit" onclick={handleFormSubmit}>
+						{#if taskIDProp === undefined}
+							<Check size={16} /> Create
+						{:else}
+							<Pencil size={16} /> Edit
+						{/if}
+						Task
+					</button>
 				</div>
 			</div>
 		</form>
@@ -115,6 +159,7 @@
 		height: 2.2rem;
 		display: flex;
 		justify-content: space-between;
+		gap: 0.5rem;
 	}
 
 	div.task-form-component div.container form div.action-buttons div.right-section {
