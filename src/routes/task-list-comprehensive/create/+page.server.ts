@@ -1,7 +1,8 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import type { Actions } from './$types';
-
 import type { Subtask } from '$lib/types/Task';
+
+import { error } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 
 export const actions = {
@@ -24,7 +25,7 @@ export const actions = {
 			i++;
 		}
 
-		if (env['X_MASTER_KEY'] === undefined) return { success: false };
+		if (env['X_MASTER_KEY'] === undefined) error(500, 'Missing variables');
 
 		const getResponse = await fetch(`${env.JSONBIN_BASE_URL}/b/${env.BIN_ID}/latest`, {
 			method: 'GET',
@@ -34,7 +35,7 @@ export const actions = {
 			}
 		});
 
-		if (!getResponse.ok) return { success: false };
+		if (!getResponse.ok) error(500, 'Server Error');
 
 		const { tasks } = await getResponse.json();
 		tasks.push({
@@ -53,9 +54,9 @@ export const actions = {
 		});
 
 		if (putResponse.ok) {
-			return { success: true };
+			return { success: true, message: 'Task Successfully Created!' };
 		} else {
-			return { success: false };
+			error(500, 'Server Error');
 		}
 	}
 } satisfies Actions;

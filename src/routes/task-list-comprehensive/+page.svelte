@@ -4,10 +4,19 @@
 	import type { PageProps } from './$types';
 	import type { Task } from '$lib/types/Task';
 
+	import SearchField from '$lib/components/TaskListPage/SearchField.svelte';
 	import TaskRow from '$lib/components/TaskListPage/TaskRow.svelte';
+	import Transparency from '$lib/components/shared/Loader/Transparency.svelte';
 
 	const { data }: PageProps = $props();
 	const { tasks } = data as { tasks: Task[] };
+
+	let isAPILoading = $state(false);
+	let reactiveTasks = $state(tasks);
+
+	const handleReset = () => {
+		reactiveTasks = tasks;
+	};
 </script>
 
 <div class="task-list-page">
@@ -15,9 +24,13 @@
 		<h1 class="title">Task List</h1>
 		<div class="task-list">
 			<div class="top-section">
+				<SearchField bind:isAPILoading bind:reactiveTasks {handleReset} />
 				<a href="/task-list-comprehensive/create"><Plus size={16} /> Create Task</a>
 			</div>
 			<div class="table-container">
+				{#if isAPILoading}
+					<Transparency --border-radius={`${10}px`} />
+				{/if}
 				<table>
 					<colgroup>
 						<col class="name" />
@@ -32,7 +45,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each tasks as task, index (task.id)}
+						{#each reactiveTasks as task, index (task.id)}
 							<TaskRow {task} isEvenRow={index % 2 === 0} />
 						{/each}
 					</tbody>
@@ -66,7 +79,7 @@
 
 	div.task-list div.top-section {
 		display: flex;
-		justify-content: end;
+		justify-content: space-between;
 		margin-bottom: 1rem;
 	}
 
@@ -93,6 +106,8 @@
 	}
 
 	div.task-list div.table-container {
+		position: relative;
+
 		max-width: 100%;
 		overflow-x: auto;
 	}

@@ -1,8 +1,7 @@
 <script lang="ts">
-	import type { PageProps } from './$types';
 	import TaskForm from '$lib/components/shared/TaskForm/TaskForm.svelte';
 
-	let { form }: PageProps = $props();
+	let { form }: { form: { success: boolean; message: string } } = $props();
 </script>
 
-<TaskForm pageName="Create Task" formSuccess={form?.success} />
+<TaskForm pageName="Create Task" formSuccess={form?.success} formMessageProp={form?.message} />

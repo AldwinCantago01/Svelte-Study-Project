@@ -7,7 +7,7 @@ import { error } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 
 export const load: PageServerLoad = async ({ fetch, params }) => {
-	if (env['X_MASTER_KEY'] === undefined) return { success: false };
+	if (env['X_MASTER_KEY'] === undefined) error(500, 'Missing variables');
 
 	const getResponse = await fetch(`${env.JSONBIN_BASE_URL}/b/${env.BIN_ID}/latest`, {
 		method: 'GET',
@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 			'X-Bin-Meta': 'false'
 		}
 	});
-	if (!getResponse.ok) return { success: false };
+	if (!getResponse.ok) error(500, 'Server Error');
 	const { tasks }: { tasks: Task[] } = await getResponse.json();
 	const task = tasks.find((task) => task.id === Number(params.id));
 	if (!task) error(404, 'Task not found');
@@ -44,7 +44,7 @@ export const actions = {
 			i++;
 		}
 
-		if (env['X_MASTER_KEY'] === undefined) return { success: false };
+		if (env['X_MASTER_KEY'] === undefined) error(500, 'Missing variables');
 
 		const getResponse = await fetch(`${env.JSONBIN_BASE_URL}/b/${env.BIN_ID}/latest`, {
 			method: 'GET',
@@ -77,9 +77,9 @@ export const actions = {
 		});
 
 		if (putResponse.ok) {
-			return { success: true };
+			return { success: true, message: 'Task Successfully Edited!' };
 		} else {
-			return { success: false };
+			error(500, 'Server Error');
 		}
 	}
 } satisfies Actions;

@@ -6,11 +6,13 @@
 
 	import SubtaskField from '$lib/components/shared/TaskForm/subcomponents/SubtaskField.svelte';
 	import FormMessage from '$lib/components/shared/FormMessage/FormMessage.svelte';
+	import Transparency from '$lib/components/shared/Loader/Transparency.svelte';
 
 	import validate from '$lib/util/validations/TaskForm/validation';
 
 	type TaskFormProps = {
 		formSuccess?: boolean;
+		formMessageProp?: string;
 		taskIDProp?: number;
 		pageName: string;
 		taskNameProp?: string;
@@ -21,6 +23,7 @@
 
 	const {
 		formSuccess = false,
+		formMessageProp = '',
 		taskIDProp,
 		pageName,
 		taskNameProp = '',
@@ -32,11 +35,12 @@
 		]
 	}: TaskFormProps = $props();
 
+	let isFormSubmitted = $state(false);
 	let taskName = $state(taskNameProp);
 	let subtasks: Subtask[] = $state(subtasksProp);
 
 	let formMessageVisible = $state(formSuccess);
-	let formMessage = $state(formSuccess ? taskIDProp === undefined ? "Task Successfully Created!" : "Task Successfully Edited!" : "");
+	let formMessage = $state(formMessageProp);
 
 	const handleAddSubtask = (event: Event) => {
 		event.preventDefault();
@@ -52,6 +56,9 @@
 
 	const handleFormSubmit = (event: Event) => {
 		event.preventDefault();
+
+		isFormSubmitted = true;
+
 		const validationResult = validate({
 			id: taskIDProp,
 			name: taskName,
@@ -59,6 +66,7 @@
 		});
 
 		if (validationResult.result === FAIL) {
+			isFormSubmitted = false;
 			formMessageVisible = true;
 			formMessage = validationResult.message;
 		}
@@ -76,6 +84,9 @@
 
 <div class="task-form-component">
 	<div class="container">
+		{#if isFormSubmitted}
+			<Transparency />
+		{/if}
 		<h1 class="title">{pageName}</h1>
 		<form bind:this={formElement} method="POST">
 			{#if formMessageVisible}
@@ -118,6 +129,7 @@
 	}
 
 	div.task-form-component div.container {
+		position: relative;
 		width: 40%;
 		border-radius: 25px;
 		box-shadow: 0px 0px 8px rgb(199, 199, 199);
